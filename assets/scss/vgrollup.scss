@@ -27,4 +27,9 @@
 		display: -webkit-box;
 		-webkit-box-orient: vertical;
 	}
+
+	&--transition {
+		transition: height .5s ease;
+		height: 100%;
+	}
 }

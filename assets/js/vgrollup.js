@@ -1,39 +1,55 @@
-window.VGSlidingContent = {
-	numeric: 1,
-	target: 'rollup-content-',
-	buttonText: {
-		more: 'More',
-		less: 'Less'
-	},
-	classes: {
-		hidden: 'vg-rollup-content--hidden',
-		fade: 'vg-rollup-content--fade',
-		ellipsis: 'vg-rollup-content--ellipsis',
-		button: 'vg-rollup-content--button',
-	},
+class VGRollup {
+	constructor(target, arg, callback) {
+		this.target = target || undefined;
+		this.classes = {
+			hidden: 'vg-rollup-content--hidden',
+			fade: 'vg-rollup-content--fade',
+			ellipsis: 'vg-rollup-content--ellipsis',
+			button: 'vg-rollup-content--button',
+			transition: 'vg-rollup-content--transition',
+		};
 
-	init: function ($self, is_button_append = true) {
-		let set_height = $self.dataset.height || null,
-			self_height = $self.clientHeight;
+		this.settings = Object.assign({
+			fade: true,
+			transition: false,
+			ellipsis: {
+				line: null
+			},
+			button: true,
+			buttonText: {
+				more: 'More',
+				less: 'Less'
+			},
+		}, arg);
 
-		if (!set_height) {
-			console.log('The [data-height] variable should not be empty')
+		if (this.target) {
+			let $element = document.getElementById(this.target);
+			this.init($element);
 
-			return;
+			let $toggle = document.querySelector('[data-rollup-toggle="'+ this.target +'"]');
+			if($toggle) this.toggle($toggle, callback);
+		} else {
+			console.error('Initialization failed')
 		}
+	}
 
-		let is_fade = $self.dataset.fade !== 'false',
-			is_ellipsis = $self.dataset.ellipsis === 'true',
-			is_button = $self.dataset.button !== 'false';
+	init($self, is_button_append = true) {
+		let self_height = $self.clientHeight,
+			set_height = $self.dataset.height || (self_height / 2);
 
-		this.switch($self);
+		let is_fade = $self.dataset.fade !== 'false' && this.settings.fade,
+			is_transition = $self.dataset.transition === 'true' || this.settings.transition,
+			is_ellipsis = $self.dataset.line || this.settings.ellipsis.line !== null,
+			is_button = $self.dataset.button !== 'false' && this.settings.button;
+
+		if (!is_button_append) this.switch($self);
 
 		if (self_height > set_height) {
 			$self.classList.add(this.classes.hidden);
 			$self.style.height = set_height + 'px';
 
 			if (is_ellipsis) {
-				let line = $self.dataset.line || null;
+				let line = $self.dataset.line || this.settings.ellipsis.line;
 				is_fade = false;
 
 				if (line) {
@@ -41,8 +57,13 @@ window.VGSlidingContent = {
 
 					$self.style.webkitLineClamp = line;
 				} else {
-					console.log('The [data-line] variable should not be empty')
+					console.log('The [data-line] or param[line] variable should not be empty')
 				}
+			}
+
+			if (is_transition) {
+				// TODO no work
+				$self.classList.add(this.classes.transition);
 			}
 
 			if (is_fade) {
@@ -50,19 +71,17 @@ window.VGSlidingContent = {
 			}
 
 			if (is_button_append) {
-				$self.setAttribute('id', this.target + this.numeric);
+				$self.setAttribute('id', this.target);
 
 				if (is_button) {
-					let btnTextMore = $self.dataset.buttonMore || this.buttonText.more;
-					$self.insertAdjacentHTML('afterend', '<div  class="' + this.classes.button + '"><a href="#" aria-expanded="false" data-rollup-toggle="' + this.target + this.numeric + '">' + btnTextMore + '</a></div>');
+					let btnTextMore = $self.dataset.buttonMore || this.settings.buttonText.more;
+					$self.insertAdjacentHTML('afterend', '<div  class="' + this.classes.button + '"><a href="#" aria-expanded="false" data-rollup-toggle="' + this.target + '">' + btnTextMore + '</a></div>');
 				}
 			}
-
-			this.numeric++;
 		}
-	},
+	}
 
-	switch: function ($self, switcher = false) {
+	switch($self, switcher = false) {
 		if (switcher) {
 			this.init($self, false);
 		} else {
@@ -72,10 +91,12 @@ window.VGSlidingContent = {
 
 			$self.removeAttribute('style');
 		}
-	},
+	}
 
-	toggle: function ($self) {
-		$self.onclick = function (e) {
+	toggle($toggle, callback) {
+		let $_this = this;
+
+		$toggle.onclick = function (e) {
 			let $btn = e.target,
 				target = $btn.dataset.rollupToggle,
 				aria = $btn.getAttribute('aria-expanded');
@@ -84,27 +105,21 @@ window.VGSlidingContent = {
 
 			if (aria === 'false') {
 				$btn.setAttribute('aria-expanded', true);
-				$btn.text = $target.dataset.buttonLess || VGSlidingContent.buttonText.less;
+				$btn.text = $target.dataset.buttonLess || $_this.settings.buttonText.less;
 
-				VGSlidingContent.switch($target, false);
+				$_this.switch($target, false);
+
+				// TODO callback the area is show
 			} else {
 				$btn.setAttribute('aria-expanded', false);
-				$btn.text = $target.dataset.buttonMore || VGSlidingContent.buttonText.more;
+				$btn.text = $target.dataset.buttonMore || $_this.settings.buttonText.more;
 
-				VGSlidingContent.switch($target, true);
+				$_this.switch($target, true);
+
+				// TODO callback the area is hide
 			}
 
 			return false;
 		}
 	}
-};
-
-let $containerSliding = document.querySelectorAll('[data-rollup-content]');
-for(let i = 1; i <= $containerSliding.length; i++) {
-	VGSlidingContent.init($containerSliding[i - 1]);
-}
-
-let $togglesSliding = document.querySelectorAll('[data-rollup-toggle]');
-for(let i = 1; i <= $togglesSliding.length; i++) {
-	VGSlidingContent.toggle($togglesSliding[i - 1]);
 }
