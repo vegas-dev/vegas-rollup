@@ -27,7 +27,7 @@ class VGRollup {
 			this.init($element);
 
 			let $toggle = document.querySelector('[data-rollup-toggle="'+ this.target +'"]');
-			if($toggle) this.toggle($toggle, callback);
+			if ($toggle) this.toggle($toggle, callback);
 		} else {
 			console.error('Initialization failed')
 		}
@@ -35,7 +35,7 @@ class VGRollup {
 
 	init($self, is_button_append = true) {
 		let self_height = $self.clientHeight,
-			set_height = $self.dataset.height || (self_height / 2);
+			set_height = parseInt($self.dataset.height) || (self_height / 2);
 
 		let is_fade = $self.dataset.fade !== 'false' && this.settings.fade,
 			is_transition = $self.dataset.transition === 'true' || this.settings.transition,
@@ -123,3 +123,5 @@ class VGRollup {
 		}
 	}
 }
+
+export default VGRollup;
