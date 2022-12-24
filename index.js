@@ -1,4 +1,4 @@
-import VGRollup from "src/VGRollup/js/VGRollup";
+import VGRollup from "src/VGRollup";
 
 export {
 	VGRollup
