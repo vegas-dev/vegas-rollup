@@ -9,7 +9,7 @@ class VGRollup {
 			transition: 'vg-rollup-content--transition',
 		};
 
-		this.settings = Object.assign({
+		this.settings = mergeDeepObject({
 			fade: true,
 			transition: false,
 			ellipsis: {
@@ -122,6 +122,34 @@ class VGRollup {
 			return false;
 		}
 	}
+}
+
+/**
+ * Глубокое объединение объектов
+ * @param objects
+ * @returns {*}
+ */
+function mergeDeepObject(...objects) {
+	const isObject = obj => obj && typeof obj === 'object';
+
+	return objects.reduce((prev, obj) => {
+		Object.keys(obj).forEach(key => {
+			const pVal = prev[key];
+			const oVal = obj[key];
+
+			if (Array.isArray(pVal) && Array.isArray(oVal)) {
+				prev[key] = pVal.concat(...oVal);
+			}
+			else if (isObject(pVal) && isObject(oVal)) {
+				prev[key] = mergeDeepObject(pVal, oVal);
+			}
+			else {
+				prev[key] = oVal;
+			}
+		});
+
+		return prev;
+	}, {});
 }
 
 export default VGRollup;
