@@ -57,7 +57,7 @@ class VGRollup {
 						let elementClass = $self.dataset.elements || 'item',
 								items = $self.querySelectorAll('.' + elementClass),
 								cnt = Number($self.dataset.cnt) || 5,
-								i = 0;
+								i = 1;
 
 						for (const item of items) {
 							if (i > cnt) {
@@ -67,9 +67,7 @@ class VGRollup {
 							i++;
 						}
 
-						isButton = i > cnt;
-
-						console.log(isButton, i, cnt)
+						isButton = (i - 1) > cnt;
 
 						ellipsis();
 						transition();
