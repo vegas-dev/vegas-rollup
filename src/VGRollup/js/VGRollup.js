@@ -68,7 +68,7 @@ class VGRollup {
 										i++;
 								}
 						}
-						
+
 						ellipsis();
 						transition();
 						fade();
