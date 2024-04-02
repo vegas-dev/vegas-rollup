@@ -60,14 +60,16 @@ class VGRollup {
 								i = 0;
 
 						for (const item of items) {
-								if (!item.classList.contains('show-more')) {
-										if (i > cnt) {
-												item.classList.add('d-none')
-										}
+							if (i > cnt) {
+								item.classList.add('d-none')
+							}
 
-										i++;
-								}
+							i++;
 						}
+
+						isButton = i > cnt;
+
+						console.log(isButton, i, cnt)
 
 						ellipsis();
 						transition();
@@ -128,7 +130,9 @@ class VGRollup {
 						$self.removeAttribute("style");
 
 						if (_this.settings.content === 'elements') {
-							let items = [...$self.querySelectorAll('.d-none')];
+							let className = $self.dataset.elements
+
+							let items = [...$self.querySelectorAll('.' + className)];
 							if (items.length) {
 									items.forEach((item) => item.classList.remove('d-none'))
 							}
