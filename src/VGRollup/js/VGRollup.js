@@ -67,7 +67,7 @@ class VGRollup {
 							i++;
 						}
 
-						isButton = (i - 1) > cnt;
+						if (isButton === true) isButton = (i - 1) > cnt;
 
 						ellipsis();
 						transition();
