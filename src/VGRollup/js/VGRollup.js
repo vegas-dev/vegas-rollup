@@ -9,13 +9,16 @@ class VGRollup {
 			transition: "vg-rollup-content--transition"
 		};
 
-		this.total = 0;
-		this.count = 0;
+		this.total    = 0;
+		this.count    = 0;
+		this.offset   = 0;
+		this.isOffset = false;
 
 		this.settings = mergeDeepObject({
 			content: 'text',
 			fade: true,
 			transition: false,
+			offset: 0,
 			ellipsis: {
 				line: null
 			},
@@ -31,6 +34,12 @@ class VGRollup {
 		if (this.target) {
 			let $element = document.getElementById(this.target);
 			this.init($element);
+
+			if (Number($element.dataset.offset) > 0) {
+				this.offset = (Number($element.dataset.offset) + Number($element.dataset.cnt)) || 0;
+				this.settings.offset = Number($element.dataset.offset) || 0;
+				this.isOffset = true;
+			}
 
 			let $toggle = document.querySelector("[data-rollup-toggle=\"" + this.target + "\"]");
 			if ($toggle) this.toggle($toggle, callback);
@@ -147,11 +156,24 @@ class VGRollup {
 			$self.removeAttribute("style");
 
 			if (_this.settings.content === 'elements') {
-				let className = $self.dataset.elements
+				let className = $self.dataset.elements;
 
 				let items = [...$self.querySelectorAll('.' + className)];
 				if (items.length) {
-					items.forEach((item) => item.classList.remove('d-none'))
+					if (_this.offset > 0) {
+						let className = $self.dataset.elements,
+							items = [...$self.querySelectorAll('.' + className)];
+
+						items.slice(_this.count, _this.offset).forEach(item => item.classList.remove('d-none'));
+						_this.offset = _this.offset + _this.settings.offset;
+
+						if (_this.offset > items.length) {
+							_this.isOffset = false;
+							_this.offset = 0;
+						}
+					} else {
+						items.forEach((item) => item.classList.remove('d-none'))
+					}
 				}
 			}
 		}
@@ -165,9 +187,27 @@ class VGRollup {
 
 			let $target = document.getElementById(target);
 
+			if ($_this.offset > 0) {
+				if ($_this.isOffset) {
+					aria = 'false';
+				} else {
+					aria = 'true';
+				}
+			}
+
 			if (aria === "false") {
 				$btn.setAttribute("aria-expanded", true);
 				$btn.text = $target.dataset.buttonLess || $_this.settings.buttonText.less;
+
+				if ($_this.offset > 0) {
+					console.log($_this.isOffset)
+
+					if ($_this.isOffset) {
+						$btn.text = $target.dataset.buttonMore || $_this.settings.buttonText.more;
+					} else {
+						$btn.text = $target.dataset.buttonLess || $_this.settings.buttonText.less;
+					}
+				}
 
 				$_this.switch($target, false);
 
@@ -185,6 +225,7 @@ class VGRollup {
 				}
 
 				$btn.setAttribute("aria-expanded", false);
+
 				$btn.text = ($target.dataset.buttonMore || $_this.settings.buttonText.more) + textShowNum;
 
 				$_this.switch($target, true);
